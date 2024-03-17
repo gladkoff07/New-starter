@@ -1,0 +1,38 @@
+@mixin respond($media) {
+  @media only screen and #{$media} {
+    @content;
+  }
+}
+
+@mixin fontFamily($size, $family) {
+  font-family: $family;
+  font-size: $size;
+}
+
+@mixin content($content: "", $left, $top) {
+  content: $content;
+  display: block;
+  position: absolute;
+  left: $left;
+  top: $top;
+}
+
+@mixin alignJustify($justify: flex-start, $vertical: flex-start) {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: $justify;
+  align-items: $vertical;
+}
+
+@mixin blockAuto($marginTop) {
+  margin-top: $marginTop;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@mixin textOverflow {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 100%;
+}

@@ -1,0 +1,22 @@
+
+.breadcrumbs {
+  @include alignJustify();
+
+  &__item {
+    margin-right: 10px;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+
+  &__link {
+    text-decoration: none;
+
+    &-current {
+    }
+
+    &:hover {
+    }
+  }
+}

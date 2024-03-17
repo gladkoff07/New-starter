@@ -1,0 +1,14 @@
+
+mixin slider
+  .slider.swiper.js-slider-name
+    .swiper-wrapper
+      +swiper-slide('')
+
+    .swiper-pagination
+    .swiper-button-prev
+    .swiper-button-next
+
+mixin swiper-slide(imgName)
+  .swiper-slide
+    .swiper-slide__img
+      img(src=`img/${imgName}.webp` alt="")

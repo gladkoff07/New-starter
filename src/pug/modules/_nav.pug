@@ -1,0 +1,12 @@
+
+mixin nav(className)
+  nav(class=`nav ${className}`)
+    - var navList = ['name']
+      each item in navList
+        a(href='#' class="nav__item")= item
+
+mixin navAncor(className)
+  nav(class=`nav ${className}`)
+    - var navList = [['ancor', 'name']]
+      each item in navList
+        a(href=`#${item[0]}` class="nav__item")= item[1]

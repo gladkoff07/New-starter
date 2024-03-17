@@ -1,0 +1,23 @@
+.form {
+  @include alignJustify();
+
+  &--column {
+    flex-direction: column;
+  }
+
+  &__input {
+    width: 100%;
+    border: none;
+    outline: none;
+    transition: all $varTrs;
+  }
+
+  &__submit {
+    cursor: pointer;
+    border: none;
+    outline: none;
+
+    &:hover {
+    }
+  }
+}

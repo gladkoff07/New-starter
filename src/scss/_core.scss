@@ -1,0 +1,102 @@
+html {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  font-family: $font;
+  font-size: $fontSize;
+  line-height: $fontLineHeight;
+  background: $colorWhite;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  font-weight: normal;
+}
+
+p {
+  margin: 0;
+}
+
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+a {
+  transition: all $varTrs;
+}
+
+img {
+  max-width: 100%;
+  vertical-align: top;
+}
+
+input,
+textarea,
+select {
+  outline: none;
+  appearance: none;
+  box-shadow: none;
+}
+
+textarea {
+  resize: none;
+}
+
+label {
+  margin: 0;
+  display: block;
+}
+
+iframe {
+  max-width: 100%;
+}
+
+a[href^="tel"],
+a[href^="mailto"] {
+  white-space: nowrap;
+}
+
+a[href^="tel"] {
+  pointer-events: none;
+
+  @include respond($tabletPortrait) {
+    pointer-events: all;
+  }
+}
+
+::selection {
+  background-color: $colorAccent;
+  color: $colorWhite;
+}
+
+::-webkit-input-placeholder {
+  color: $colorBlack;
+  font-size: $fontSize;
+}
+:-moz-placeholder {
+  color: $colorBlack;
+  font-size: $fontSize;
+}
+::-moz-placeholder {
+  color: $colorBlack;
+  font-size: $fontSize;
+}
+:-ms-input-placeholder {
+  color: $colorBlack;
+  font-size: $fontSize;
+}

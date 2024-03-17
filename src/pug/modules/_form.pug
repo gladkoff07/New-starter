@@ -1,0 +1,9 @@
+
+mixin form(className)
+  form(action="#" class=`form ${className}`)
+
+mixin input(type, name, className, placeholder)
+  input(type = `${type}` name = `${name}` class=`${className}` placeholder=`${placeholder}`)
+
+mixin input-error(className, text)
+  div(class=`error ${className}`)= text

@@ -1,0 +1,14 @@
+
+.nav {
+  @include alignJustify();
+
+  &__item {
+    text-decoration: none;
+
+    &_active {
+    }
+
+    &:hover {
+    }
+  }
+}

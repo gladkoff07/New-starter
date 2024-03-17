@@ -1,0 +1,9 @@
+
+mixin breadcrumbs(className, ...items)
+  ul(class=`breadcrumbs ${className}`)
+    each item, index in items
+      li.breadcrumbs__item
+        if (index < items.length - 1)
+          a(href="#" class="breadcrumbs__link")= item
+        else
+          span.breadcrumbs__link-current= item
