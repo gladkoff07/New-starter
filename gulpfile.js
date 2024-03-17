@@ -22,6 +22,11 @@ import extReplace from "gulp-ext-replace";
 import webp from "imagemin-webp";
 const sass = gulpSass(dartSass);
 
+
+import sassLint from 'gulp-sass-lint';
+import jshint from 'gulp-jshint';
+import stylish from 'jshint-stylish';
+
 /* Config */
 const coreDir = {
   src: "src",
@@ -261,6 +266,29 @@ gulp.task("img:webp", function () {
     .pipe(extReplace(".webp"))
     .pipe(gulp.dest("./src/img"));
   return stream;
+});
+
+// SASS LINT
+gulp.task("scss:lint", function () {
+  return gulp
+    .src(config.styles.src)
+    .pipe(sassLint({
+      options: {
+        formatter: 'stylish',
+        'merge-default-rules': true
+      },
+    }))
+    .pipe(sassLint.format())
+    .pipe(sassLint.failOnError());
+});
+
+// JS LINTER
+gulp.task("js:lint", function () {
+  return gulp
+    .src(config.scripts.src)
+    .pipe(jshint())
+    .pipe(jshint.reporter(stylish))
+    .pipe(jshint.reporter('fail'));
 });
 
 // add settings Host(create file apiHost.js for your data)
