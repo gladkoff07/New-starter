@@ -27,6 +27,9 @@ import sassLint from 'gulp-sass-lint';
 import jshint from 'gulp-jshint';
 import stylish from 'jshint-stylish';
 
+// add settings Host(create file apiHost.js for your data)
+// import dataHost from "./apiHost.js";
+
 /* Config */
 const coreDir = {
   src: "src",
@@ -139,8 +142,8 @@ gulp.task("script-libs", () => {
 });
 
 // Remove html before build
-gulp.task("html-del", () => {
-  return deleteAsync([config.html.src]);
+gulp.task("html-del", async () => {
+  return await deleteAsync([config.html.src]);
 });
 
 /* PUG */
@@ -157,8 +160,8 @@ gulp.task("pug:dev", () => {
 // Remove html before build
 gulp.task(
   "pug:build",
-  gulp.series("html-del", () => {
-    return gulp
+  gulp.series("html-del", async () => {
+    return await gulp
       .src(config.pug.src)
       .pipe(plumber())
       .pipe(pug({ pretty: true }).on("error", notify.onError()))
@@ -233,7 +236,7 @@ gulp.task("html-beauty", function () {
 
 /* Browser Sync */
 gulp.task("browser-sync", () => {
-  browserSync({
+  browserSync.init({
     server: {
       baseDir: coreDir.dist,
     },
@@ -289,9 +292,6 @@ gulp.task("js:lint", function () {
     .pipe(jshint.reporter(stylish))
     .pipe(jshint.reporter('fail'));
 });
-
-// add settings Host(create file apiHost.js for your data)
-// import dataHost from "./apiHost.js";
 
 /* Deploy */
 gulp.task("deploy", function () {
