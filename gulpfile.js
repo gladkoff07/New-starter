@@ -85,7 +85,7 @@ gulp.task("styles:dev", () => {
     .pipe(rename({ suffix: ".min", prefix: "" }))
     .pipe(sourcemaps.write())
     .pipe(gulp.dest(config.styles.dist))
-    .pipe(browserSync.reload({ stream: true }));
+    .pipe(browserSync.stream());
 });
 
 gulp.task("styles:build", () => {
@@ -121,7 +121,7 @@ gulp.task("scripts:dev", () => {
     .src(config.scripts.src)
     .pipe(babel())
     .pipe(gulp.dest(config.scripts.dist))
-    .pipe(browserSync.reload({ stream: true }));
+    .pipe(browserSync.stream());
 });
 
 gulp.task("scripts:build", () => {
@@ -152,7 +152,6 @@ gulp.task("pug:dev", () => {
     .pipe(plumber.stop())
     .pipe(gulp.dest(config.pug.dist))
     .pipe(browserSync.stream());
-    // .pipe(browserSync.reload({ stream: true }));
 });
 
 // Remove html before build
