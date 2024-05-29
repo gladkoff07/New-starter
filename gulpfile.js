@@ -7,11 +7,11 @@ import pug from "gulp-pug";
 import beauty from "gulp-html-beautify";
 import plumber from "gulp-plumber";
 import notify from "gulp-notify";
-import browserSync from "browser-sync";
+import bs from "browser-sync";
 import rename from "gulp-rename";
 import cleanCss from "gulp-clean-css";
 import babel from "gulp-babel";
-import { deleteAsync } from "del";
+import { deleteAsync as del } from "del";
 import webpack from "webpack";
 import webpackStream from "webpack-stream";
 import svgSprite from "gulp-svg-sprites";
@@ -27,8 +27,13 @@ import sassLint from 'gulp-sass-lint';
 import jshint from 'gulp-jshint';
 import stylish from 'jshint-stylish';
 
+/* Scripts */
+import webpackConfig from "./webpack.config.js";
+
 // add settings Host(create file apiHost.js for your data)
 // import dataHost from "./apiHost.js";
+
+const browserSync = bs.create();
 
 /* Config */
 const coreDir = {
@@ -116,9 +121,6 @@ gulp.task("svg", () => {
   return gulp.src(config.svg.src).pipe(gulp.dest(config.svg.dist));
 });
 
-/* Scripts */
-import webpackConfig from "./webpack.config.js";
-
 gulp.task("scripts:dev", () => {
   return gulp
     .src(config.scripts.src)
@@ -142,8 +144,8 @@ gulp.task("script-libs", () => {
 });
 
 // Remove html before build
-gulp.task("html-del", async () => {
-  return await deleteAsync([config.html.src]);
+gulp.task("html-del", () => {
+  return del([config.html.src]);
 });
 
 /* PUG */
@@ -160,8 +162,8 @@ gulp.task("pug:dev", () => {
 // Remove html before build
 gulp.task(
   "pug:build",
-  gulp.series("html-del", async () => {
-    return await gulp
+  gulp.series("html-del", () => {
+    return gulp
       .src(config.pug.src)
       .pipe(plumber())
       .pipe(pug({ pretty: true }).on("error", notify.onError()))
@@ -235,10 +237,16 @@ gulp.task("html-beauty", function () {
 });
 
 /* Browser Sync */
-gulp.task("browser-sync", () => {
+gulp.task("browser-sync", function() {
   browserSync.init({
     server: {
       baseDir: coreDir.dist,
+    },
+    ui: {
+      port: 8080,
+      weinre: {
+          port: 9090
+      }
     },
   });
 });
@@ -333,7 +341,7 @@ gulp.task(
       gulp.watch(config.pug.watch, gulp.series("pug:dev"));
       gulp.watch(config.scripts.watch, gulp.series("scripts:dev"));
       gulp.watch(config.scriptLibs.watch, gulp.series("script-libs"));
-      gulp.watch(config.html.src, browserSync.reload);
+      gulp.watch(config.html.src, browserSync.reload());
     }
   )
 );
@@ -348,8 +356,9 @@ gulp.task(
     "svg",
     "scripts:build",
     "script-libs",
-    () => {
+    (done) => {
       gulp.series("html-beauty");
+      done();
     }
   )
 );
