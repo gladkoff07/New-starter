@@ -1,46 +1,35 @@
 import gulp from "gulp";
-import dartSass from "sass";
+import { src, dest, watch, parallel, series, lastRun } from 'gulp';
+import * as dartSass from 'sass';
 import gulpSass from "gulp-sass";
-import sourcemaps from "gulp-sourcemaps";
-import autoPrefixer from "gulp-autoprefixer";
-import pug from "gulp-pug";
-import beauty from "gulp-html-beautify";
-import plumber from "gulp-plumber";
-import notify from "gulp-notify";
-import bs from "browser-sync";
-import rename from "gulp-rename";
+import rename from 'gulp-rename';
 import cleanCss from "gulp-clean-css";
-import babel from "gulp-babel";
+import autoPrefixer from "gulp-autoprefixer";
 import { deleteAsync as del } from "del";
-import webpack from "webpack";
-import webpackStream from "webpack-stream";
+import notify from "gulp-notify";
+import babel from "gulp-babel";
+import plumber from "gulp-plumber";
+import pug from "gulp-pug";
 import svgSprite from "gulp-svg-sprites";
-import util from "gulp-util";
-import ftp from "vinyl-ftp";
 import imageMin from "gulp-imagemin";
 import extReplace from "gulp-ext-replace";
 import webp from "imagemin-webp";
-const sass = gulpSass(dartSass);
+import bs from "browser-sync";
+import webpack from "webpack";
+import webpackStream from "webpack-stream";
 
-
-import sassLint from 'gulp-sass-lint';
-import jshint from 'gulp-jshint';
-import stylish from 'jshint-stylish';
-
-/* Scripts */
+/* Scripts libraries */
 import webpackConfig from "./webpack.config.js";
 
-// add settings Host(create file apiHost.js for your data)
-// import dataHost from "./apiHost.js";
-
+const sass = gulpSass(dartSass);
 const browserSync = bs.create();
 
-/* Config */
 const coreDir = {
   src: "src",
   dist: "build",
 };
 
+/* Config */
 const config = {
   styles: {
     src: `${coreDir.src}/scss/*.scss`,
@@ -84,284 +73,133 @@ const config = {
   },
 };
 
-/* Styles */
-gulp.task("styles:dev", () => {
-  return gulp
-    .src(config.styles.src)
-    .pipe(sourcemaps.init())
-    .pipe(sass().on("error", notify.onError()))
-    .pipe(rename({ suffix: ".min", prefix: "" }))
-    .pipe(sourcemaps.write())
-    .pipe(gulp.dest(config.styles.dist))
-    .pipe(browserSync.stream());
-});
+export const clean = async () => del([ coreDir.dist ], { force: true });
 
-gulp.task("styles:build", () => {
-  return gulp
-    .src(config.styles.src)
+export function stylesDev() {
+  return src(config.styles.src, { sourcemaps: true })
     .pipe(sass().on("error", notify.onError()))
     .pipe(rename({ suffix: ".min", prefix: "" }))
-    .pipe(autoPrefixer())
+    .pipe(dest(config.styles.dist))
+    .pipe(browserSync.stream());
+}
+
+export function stylesBuild() {
+  return src(config.styles.src)
+    .pipe(sass().on("error", notify.onError()))
+    .pipe(rename({ suffix: ".min", prefix: "" }))
+    .pipe(autoPrefixer({ overrideBrowserslist: ['last 5 versions'], grid: true }))
     .pipe(cleanCss({ level: { 1: { specialComments: 1 } } }))
-    .pipe(gulp.dest(config.styles.dist));
-});
+    .pipe(dest(config.styles.dist));
+}
 
-/* Img */
-gulp.task("img", () => {
-  return gulp.src(config.img.src).pipe(gulp.dest(config.img.dist));
-});
-
-/* Fonts */
-gulp.task("fonts", () => {
-  return gulp.src(config.fonts.src).pipe(gulp.dest(config.fonts.dist));
-});
-
-/* Svg */
-gulp.task("svg", () => {
-  return gulp.src(config.svg.src).pipe(gulp.dest(config.svg.dist));
-});
-
-gulp.task("scripts:dev", () => {
-  return gulp
-    .src(config.scripts.src)
+export function scriptsDev() {
+  return src(config.scripts.src, { sourcemaps: true })
     .pipe(babel())
-    .pipe(gulp.dest(config.scripts.dist))
+    .pipe(dest(config.scripts.dist))
     .pipe(browserSync.stream());
-});
+}
 
-gulp.task("scripts:build", () => {
-  return gulp
-    .src(config.scripts.src)
+export function scriptsBuild() {
+  return src(config.scripts.src)
     .pipe(babel())
-    .pipe(gulp.dest(config.scripts.dist));
-});
+    .pipe(dest(config.scripts.dist))
+}
 
-gulp.task("script-libs", () => {
-  return gulp
-    .src(config.scriptLibs.src)
-    .pipe(webpackStream(webpackConfig), webpack)
-    .pipe(gulp.dest(config.scriptLibs.dist));
-});
+export function scriptsLibs() {
+  return src(config.scriptLibs.src)
+    .pipe(webpackStream(webpackConfig), webpack({ watch: true }))
+    .pipe(dest(config.scriptLibs.dist));
+}
 
-// Remove html before build
-gulp.task("html-del", () => {
-  return del([config.html.src]);
-});
-
-/* PUG */
-gulp.task("pug:dev", () => {
-  return gulp
-    .src(config.pug.src)
+export function pugDev() {
+  return src(config.pug.src)
     .pipe(plumber())
     .pipe(pug().on("error", notify.onError()))
     .pipe(plumber.stop())
-    .pipe(gulp.dest(config.pug.dist))
-    .pipe(browserSync.stream());
-});
+    .pipe(dest(config.pug.dist))
+    .pipe(browserSync.reload({ stream: true, }))
+}
 
-// Remove html before build
-gulp.task(
-  "pug:build",
-  gulp.series("html-del", () => {
-    return gulp
-      .src(config.pug.src)
-      .pipe(plumber())
-      .pipe(pug({ pretty: true }).on("error", notify.onError()))
-      .pipe(plumber.stop())
-      .pipe(gulp.dest(config.pug.dist));
-  })
-);
+export function pugBuild() {
+  return src(config.pug.src)
+    .pipe(plumber())
+    .pipe(pug({ pretty: true }).on("error", notify.onError()))
+    .pipe(plumber.stop())
+    .pipe(dest(config.pug.dist));
+}
 
-/* HTML */
-const beautyOpts = {
-  indent_size: 2,
-  indent_with_tabs: true,
-  end_with_newline: true,
-  keep_array_indentation: true,
-  unformatted: [
-    "abbr",
-    "area",
-    "b",
-    "bdi",
-    "bdo",
-    "br",
-    "cite",
-    "code",
-    "data",
-    "datalist",
-    "del",
-    "dfn",
-    "em",
-    "embed",
-    "i",
-    "ins",
-    "kbd",
-    "keygen",
-    "map",
-    "mark",
-    "math",
-    "meter",
-    "noscript",
-    "object",
-    "output",
-    "progress",
-    "q",
-    "ruby",
-    "s",
-    "samp",
-    "small",
-    "strong",
-    "sub",
-    "sup",
-    "template",
-    "time",
-    "u",
-    "var",
-    "wbr",
-    "text",
-    "acronym",
-    "address",
-    "big",
-    "dt",
-    "ins",
-    "strike",
-    "tt",
-  ],
-};
+export function copyFonts() {
+  return src(config.fonts.watch, { encoding: false })
+    .pipe(dest(config.fonts.dist))
+    .pipe(browserSync.reload({ stream: true, }))
+}
 
-gulp.task("html-beauty", function () {
-  return gulp
-    .src(config.html.src)
-    .pipe(beauty(beautyOpts))
-    .pipe(gulp.dest(config.html.dist));
-});
+export function copyImages() {
+  return src(config.img.watch, { encoding: false })
+    .pipe(dest(config.img.dist))
+    .pipe(browserSync.reload({ stream: true, }))
+}
 
-/* Browser Sync */
-gulp.task("browser-sync", function() {
+export function copySvg() {
+  return src(config.svg.src, { encoding: false })
+    .pipe(dest(config.svg.dist))
+}
+
+async function copyResources() {
+  copyFonts()
+  copyImages()
+  copySvg()
+}
+
+export function watchFiles() {
+  watch(config.styles.watch, stylesDev);
+  watch(config.scripts.watch, scriptsDev);
+  watch(config.img.watch, copyImages);
+  watch(config.fonts.watch, copyFonts);
+  watch(config.pug.src, pugDev);
+}
+
+export function browsersync() {
   browserSync.init({
     server: {
-      baseDir: coreDir.dist,
+      baseDir: './build/',
+      serveStaticOptions: {
+        extensions: ['html'],
+      },
     },
-    ui: {
-      port: 8080,
-      weinre: {
-          port: 9090
-      }
-    },
-  });
-});
+    port: 8080,
+    ui: { port: 8081 },
+    open: true,
+  })
+}
 
-/* SVG Sprite */
-gulp.task("svg:sprite", function () {
-  return gulp
-    .src("src/sources/svg/*.svg")
+export function svgSprites() {
+  return src("src/sources/svg/*.svg")
     .pipe(
       svgSprite({
         mode: "symbols",
       })
     )
-    .pipe(gulp.dest("src"));
-});
+    .pipe(dest("src"));
+}
 
-/* Convert png to webp */
-gulp.task("img:webp", function () {
+export function imgWebp() {
   const stream = gulp
-    .src("./src/sources/img/**/*.{jpg,png}")
+    .src("./src/sources/img/**/*.{jpg,png}", { encoding: false })
     .pipe(
       imageMin({
+        progressive: true,
         verbose: true,
         plugins: webp({ quality: 70 }),
       })
     )
     .pipe(extReplace(".webp"))
-    .pipe(gulp.dest("./src/img"));
+    .pipe(dest("./src/img"));
   return stream;
-});
+}
 
-// SASS LINT
-gulp.task("scss:lint", function () {
-  return gulp
-    .src(config.styles.src)
-    .pipe(sassLint({
-      options: {
-        formatter: 'stylish',
-        'merge-default-rules': true
-      },
-    }))
-    .pipe(sassLint.format())
-    .pipe(sassLint.failOnError());
-});
+const gulpDev = gulp.series(clean, gulp.parallel(pugDev, stylesDev, scriptsDev, scriptsLibs, copyResources, browsersync, watchFiles));
+export default gulpDev;
 
-// JS LINTER
-gulp.task("js:lint", function () {
-  return gulp
-    .src(config.scripts.src)
-    .pipe(jshint())
-    .pipe(jshint.reporter(stylish))
-    .pipe(jshint.reporter('fail'));
-});
-
-/* Deploy */
-gulp.task("deploy", function () {
-  var conn = ftp.create({
-    host: dataHost.host,
-    user: dataHost.user,
-    password: dataHost.password,
-    parallel: 10,
-    log: util.log,
-  });
-
-  var globs = ["build/**"];
-
-  // using base = '.' will transfer everything to /public_html correctly
-  // turn off buffering in gulp.src for best performance
-  return gulp
-    .src(globs, { base: "build", buffer: false })
-    .pipe(conn.newer("www/html/nameDomain/sites/nameSite/")) // only upload newer files
-    .pipe(conn.dest("www/html/nameDomain/sites/nameSite/"));
-});
-
-/* Dev */
-gulp.task(
-  "watch",
-  gulp.parallel(
-    "browser-sync",
-    "pug:dev",
-    "styles:dev",
-    "img",
-    "fonts",
-    "svg",
-    "scripts:dev",
-    "script-libs",
-    () => {
-      gulp.watch(config.styles.watch, gulp.series("styles:dev"));
-      gulp.watch(config.img.watch, gulp.series("img"));
-      gulp.watch(config.fonts.watch, gulp.series("fonts"));
-      gulp.watch(config.svg.watch, gulp.series("svg"));
-      gulp.watch(config.pug.watch, gulp.series("pug:dev"));
-      gulp.watch(config.scripts.watch, gulp.series("scripts:dev"));
-      gulp.watch(config.scriptLibs.watch, gulp.series("script-libs"));
-      gulp.watch(config.html.src, browserSync.reload());
-    }
-  )
-);
-
-/* Build */
-gulp.task(
-  "build",
-  gulp.parallel(
-    "styles:build",
-    "pug:build",
-    "fonts",
-    "svg",
-    "scripts:build",
-    "script-libs",
-    (done) => {
-      gulp.series("html-beauty");
-      done();
-    }
-  )
-);
-
-/* Default Watch */
-gulp.task("default", gulp.parallel("watch"));
+const build = gulp.series(clean, gulp.parallel(pugBuild, stylesBuild, scriptsBuild, scriptsLibs, copyResources));
+export { build };

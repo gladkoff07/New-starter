@@ -11,7 +11,7 @@ Fancybox.bind("[data-fancybox]", {
 });
 
 // Swiper init
-const swiperWorksVideo = new Swiper(".js-slider-name", {
+const swiperName = new Swiper(".js-slider-name", {
   // configure Swiper to use modules
   modules: [Navigation, Pagination],
 
