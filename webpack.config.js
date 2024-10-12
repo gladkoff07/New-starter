@@ -2,17 +2,15 @@
 import webpack from 'webpack';
 
 const webpackConfig = {
-  plugins: [
-    new webpack.ProvidePlugin({
-      $: 'jquery',
-      jQuery: 'jquery'
-    })
-  ],
-
+  // plugins: [
+  //   new webpack.ProvidePlugin({
+  //     $: 'jquery',
+  //     jQuery: 'jquery'
+  //   })
+  // ],
   output: {
     filename: "vendor.js"
   },
-
   module: {
     rules: [
       {
