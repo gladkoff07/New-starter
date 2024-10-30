@@ -20,4 +20,4 @@ gulp build
 
 ### Requirements
 
-Node.js: 20.10.0
+Node.js: 20.13.1

@@ -21,6 +21,9 @@ import webpackStream from "webpack-stream";
 /* Scripts libraries */
 import webpackConfig from "./webpack.config.js";
 
+// add settings Host(create file apiHost.js for your data)
+import dataHost from "./apiHost.js";
+
 const sass = gulpSass(dartSass);
 const browserSync = bs.create();
 
@@ -108,7 +111,8 @@ export function scriptsBuild() {
 export function scriptsLibs() {
   return src(config.scriptLibs.src)
     .pipe(webpackStream(webpackConfig), webpack({ watch: true }))
-    .pipe(dest(config.scriptLibs.dist));
+    .pipe(dest(config.scriptLibs.dist))
+    .pipe(browserSync.stream());
 }
 
 export function pugDev() {
@@ -117,7 +121,7 @@ export function pugDev() {
     .pipe(pug().on("error", notify.onError()))
     .pipe(plumber.stop())
     .pipe(dest(config.pug.dist))
-    .pipe(browserSync.reload({ stream: true, }))
+    .pipe(browserSync.reload({ stream: true }))
 }
 
 export function pugBuild() {
@@ -131,13 +135,13 @@ export function pugBuild() {
 export function copyFonts() {
   return src(config.fonts.watch, { encoding: false })
     .pipe(dest(config.fonts.dist))
-    .pipe(browserSync.reload({ stream: true, }))
+    .pipe(browserSync.reload({ stream: true }))
 }
 
 export function copyImages() {
   return src(config.img.watch, { encoding: false })
     .pipe(dest(config.img.dist))
-    .pipe(browserSync.reload({ stream: true, }))
+    .pipe(browserSync.reload({ stream: true }))
 }
 
 export function copySvg() {
@@ -154,9 +158,10 @@ async function copyResources() {
 export function watchFiles() {
   watch(config.styles.watch, stylesDev);
   watch(config.scripts.watch, scriptsDev);
+  watch(config.scriptLibs.watch, scriptsLibs);
   watch(config.img.watch, copyImages);
   watch(config.fonts.watch, copyFonts);
-  watch(config.pug.src, pugDev);
+  watch(config.pug.watch, pugDev);
 }
 
 export function browsersync() {
